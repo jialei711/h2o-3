@@ -37,6 +37,12 @@ public class XGBoostUpdater extends Thread {
     _rabitEnv = rabitEnv;
     _in = new SynchronousQueue<>();
     _out = new SynchronousQueue<>();
+    setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+      @Override
+      public void uncaughtException(Thread t, Throwable e) {
+        Log.err("Uncaught exception in XGBoostUpdater.run", e);
+      }
+    });
   }
 
   @Override
@@ -55,7 +61,7 @@ public class XGBoostUpdater extends Thread {
         throw new IllegalStateException("Updater thread was interrupted while it was still registered, name=" + self.getName());
       }
     } catch (XGBoostError e) {
-      throw new IllegalStateException("XGBoost training iteration failed", e);
+      Log.err("XGBoost training iteration failed", e);
     } finally {
       _in = null; // Will throw NPE if used wrong
       _out = null;
